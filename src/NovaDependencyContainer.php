@@ -39,15 +39,13 @@ class NovaDependencyContainer extends Field
      * Adds a dependency
      *
      * @param $field
-     * @param $value
+     * @param $values
      * @return $this
      */
-    public function dependsOn($field, $value)
+    public function dependsOn($field, $values)
     {
         return $this->withMeta([
-            'dependencies' => array_merge($this->meta['dependencies'], [
-                $this->getFieldLayout($field, $value)
-            ])
+            'dependencies' => array_merge($this->meta['dependencies'], [['field' => $field, 'values' => (array) $values]])
         ]);
     }
 
@@ -145,10 +143,13 @@ class NovaDependencyContainer extends Field
                 $this->meta['dependencies'][$index]['satisfied'] = true;
                 continue;
             }
-
-            if (array_key_exists('value', $dependency) && $dependency['value'] == $resource->{$dependency['property']}) {
-                $this->meta['dependencies'][$index]['satisfied'] = true;
-                continue;
+            
+            if(array_key_exists('values', $dependency)) {
+            	foreach($dependency['values'] as $value) {
+            	    if ($value == $resource->{$dependency['field']}) {
+		                $this->meta['dependencies'][$index]['satisfied'] = true;
+	                }
+                }
             }
         }
     }
